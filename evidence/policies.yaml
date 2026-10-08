@@ -1,0 +1,168 @@
+apiVersion: v1
+items:
+- apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"cilium.io/v2","kind":"CiliumNetworkPolicy","metadata":{"annotations":{},"name":"service-lab-access","namespace":"service-lab"},"spec":{"egress":[{"toEndpoints":[{"matchLabels":{"k8s:io.kubernetes.pod.namespace":"kube-system","k8s:k8s-app":"kube-dns"}}],"toPorts":[{"ports":[{"port":"53","protocol":"UDP"},{"port":"53","protocol":"TCP"}]}]},{"toEndpoints":[{"matchLabels":{"k8s:app":"istiod","k8s:io.kubernetes.pod.namespace":"istio-system"}}],"toPorts":[{"ports":[{"port":"15012","protocol":"TCP"}]}]},{"toEndpoints":[{"matchLabels":{"k8s:app":"service-lab","k8s:io.kubernetes.pod.namespace":"service-lab"}}],"toPorts":[{"ports":[{"port":"8000","protocol":"TCP"}]}]},{"icmps":[{"fields":[{"family":"IPv4","type":8}]}],"toCIDR":["77.88.8.8/32"]}],"endpointSelector":{},"ingress":[{"fromEndpoints":[{"matchLabels":{"k8s:app.kubernetes.io/name":"traefik","k8s:io.kubernetes.pod.namespace":"traefik"}},{"matchLabels":{"k8s:app":"security-probe","k8s:io.kubernetes.pod.namespace":"service-lab"}},{"matchLabels":{"k8s:app":"service-lab","k8s:io.kubernetes.pod.namespace":"service-lab"}}],"toPorts":[{"ports":[{"port":"8000","protocol":"TCP"}]}]},{"fromEntities":["host","remote-node"],"toPorts":[{"ports":[{"port":"15020","protocol":"TCP"},{"port":"15021","protocol":"TCP"}]}]},{"fromCIDR":["10.244.0.1/32","10.244.1.1/32","10.244.2.1/32"],"toPorts":[{"ports":[{"port":"15020","protocol":"TCP"},{"port":"15021","protocol":"TCP"}]}]}]}}
+    creationTimestamp: "2026-10-08T16:11:29Z"
+    generation: 2
+    name: service-lab-access
+    namespace: service-lab
+    resourceVersion: "44565"
+    uid: b1045a29-a617-46e4-9761-35dea3822175
+  spec:
+    egress:
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:app: istiod
+          k8s:io.kubernetes.pod.namespace: istio-system
+      toPorts:
+      - ports:
+        - port: "15012"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:app: service-lab
+          k8s:io.kubernetes.pod.namespace: service-lab
+      toPorts:
+      - ports:
+        - port: "8000"
+          protocol: TCP
+    - icmps:
+      - fields:
+        - family: IPv4
+          type: 8
+      toCIDR:
+      - 77.88.8.8/32
+    endpointSelector: {}
+    ingress:
+    - fromEndpoints:
+      - matchLabels:
+          k8s:app.kubernetes.io/name: traefik
+          k8s:io.kubernetes.pod.namespace: traefik
+      - matchLabels:
+          k8s:app: security-probe
+          k8s:io.kubernetes.pod.namespace: service-lab
+      - matchLabels:
+          k8s:app: service-lab
+          k8s:io.kubernetes.pod.namespace: service-lab
+      toPorts:
+      - ports:
+        - port: "8000"
+          protocol: TCP
+    - fromEntities:
+      - host
+      - remote-node
+      toPorts:
+      - ports:
+        - port: "15020"
+          protocol: TCP
+        - port: "15021"
+          protocol: TCP
+    - fromCIDR:
+      - 10.244.0.1/32
+      - 10.244.1.1/32
+      - 10.244.2.1/32
+      toPorts:
+      - ports:
+        - port: "15020"
+          protocol: TCP
+        - port: "15021"
+          protocol: TCP
+  status:
+    conditions:
+    - lastTransitionTime: "2026-10-08T16:11:29Z"
+      message: Policy validation succeeded
+      status: "True"
+      type: Valid
+- apiVersion: security.istio.io/v1
+  kind: AuthorizationPolicy
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"security.istio.io/v1","kind":"AuthorizationPolicy","metadata":{"annotations":{},"name":"service-lab-http","namespace":"service-lab"},"spec":{"action":"ALLOW","rules":[{"to":[{"operation":{"methods":["GET"],"paths":["/health","/metrics"]}}]},{"to":[{"operation":{"methods":["POST"],"paths":["/"]}}],"when":[{"key":"request.headers[test]","values":["Hello"]}]}],"selector":{"matchLabels":{"app":"service-lab"}}}}
+    creationTimestamp: "2026-10-08T16:11:29Z"
+    generation: 1
+    name: service-lab-http
+    namespace: service-lab
+    resourceVersion: "38703"
+    uid: 7321d2a8-f008-456d-bee8-29e52355eded
+  spec:
+    action: ALLOW
+    rules:
+    - to:
+      - operation:
+          methods:
+          - GET
+          paths:
+          - /health
+          - /metrics
+    - to:
+      - operation:
+          methods:
+          - POST
+          paths:
+          - /
+      when:
+      - key: request.headers[test]
+        values:
+        - Hello
+    selector:
+      matchLabels:
+        app: service-lab
+- apiVersion: networking.istio.io/v1
+  kind: Sidecar
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.istio.io/v1","kind":"Sidecar","metadata":{"annotations":{},"name":"service-lab-egress","namespace":"service-lab"},"spec":{"egress":[{"hosts":["./*","istio-system/*","kube-system/kube-dns.kube-system.svc.cluster.local"]}],"outboundTrafficPolicy":{"mode":"REGISTRY_ONLY"},"workloadSelector":{"labels":{"app":"service-lab"}}}}
+    creationTimestamp: "2026-10-08T16:11:29Z"
+    generation: 1
+    name: service-lab-egress
+    namespace: service-lab
+    resourceVersion: "38705"
+    uid: e5d05071-a69a-4557-98c9-03eb5085f5ff
+  spec:
+    egress:
+    - hosts:
+      - ./*
+      - istio-system/*
+      - kube-system/kube-dns.kube-system.svc.cluster.local
+    outboundTrafficPolicy:
+      mode: REGISTRY_ONLY
+    workloadSelector:
+      labels:
+        app: service-lab
+- apiVersion: security.istio.io/v1
+  kind: PeerAuthentication
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"security.istio.io/v1","kind":"PeerAuthentication","metadata":{"annotations":{},"name":"service-lab-peer","namespace":"service-lab"},"spec":{"mtls":{"mode":"PERMISSIVE"},"selector":{"matchLabels":{"app":"service-lab"}}}}
+    creationTimestamp: "2026-10-08T16:11:29Z"
+    generation: 1
+    name: service-lab-peer
+    namespace: service-lab
+    resourceVersion: "38702"
+    uid: 06058b3a-cbe1-4a42-ba25-86af75ebb1bf
+  spec:
+    mtls:
+      mode: PERMISSIVE
+    selector:
+      matchLabels:
+        app: service-lab
+kind: List
+metadata:
+  resourceVersion: ""

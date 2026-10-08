@@ -1,0 +1,50 @@
+2026-10-08T16:25:18.997163Z	info	Version 1.31.1-190ae921b848ec010b8be4457533837ed8fce258-Clean
+2026-10-08T16:25:18.997317Z	info	Proxy role	ips=[10.244.1.28] type=sidecar id=service-lab-5cb97b65df-s5mdx.service-lab domain=service-lab.svc.cluster.local
+2026-10-08T16:25:18.997347Z	info	Apply proxy config from env {"holdApplicationUntilProxyStarts":true}
+
+2026-10-08T16:25:19.047031Z	info	cpu limit detected as 1, setting concurrency
+2026-10-08T16:25:19.047198Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+concurrency: 1
+configPath: ./etc/istio/proxy
+controlPlaneAuthPolicy: MUTUAL_TLS
+discoveryAddress: istiod.istio-system.svc:15012
+drainDuration: 45s
+holdApplicationUntilProxyStarts: true
+proxyAdminPort: 15000
+serviceCluster: istio-proxy
+statNameLength: 189
+statusPort: 15020
+terminationDrainDuration: 5s
+
+2026-10-08T16:25:19.047217Z	info	JWT policy is third-party-jwt
+2026-10-08T16:25:19.047223Z	info	using credential fetcher of JWT type in cluster.local trust domain
+2026-10-08T16:25:19.251115Z	info	Starting default Istio SDS Server
+2026-10-08T16:25:19.251154Z	info	CA Endpoint istiod.istio-system.svc:15012, provider Citadel
+2026-10-08T16:25:19.251166Z	info	Using CA istiod.istio-system.svc:15012 cert with certs: var/run/secrets/istio/root-cert.pem
+2026-10-08T16:25:19.251460Z	info	Opening status port 15020
+2026-10-08T16:25:19.252220Z	info	xdsproxy	Initializing with upstream address "istiod.istio-system.svc:15012" and cluster "Kubernetes"
+2026-10-08T16:25:19.263316Z	info	sds	Starting SDS grpc server
+2026-10-08T16:25:19.263496Z	info	sds	Starting SDS server for workload certificates, will listen on "var/run/secrets/workload-spiffe-uds/socket"
+2026-10-08T16:25:19.265131Z	info	Pilot SAN: [istiod.istio-system.svc]
+2026-10-08T16:25:19.266002Z	info	Starting proxy agent
+2026-10-08T16:25:19.266119Z	info	Envoy command: [-c etc/istio/proxy/envoy-rev.json --drain-time-s 45 --drain-strategy immediate --local-address-ip-version v4 --file-flush-interval-msec 1000 --disable-hot-restart --allow-unknown-static-fields -l warning --component-log-level misc:error --skip-deprecated-logs --concurrency 1]
+2026-10-08T16:25:19.788145Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=1
+2026-10-08T16:25:19.851214Z	info	cache	generated new workload certificate	resourceName=default latency=596.762067ms ttl=23h59m59.148789759s
+2026-10-08T16:25:19.851277Z	info	cache	Root cert has changed, start rotating root cert
+2026-10-08T16:25:19.851305Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.148695958s
+2026-10-08T16:25:20.006797Z	info	ads	ADS: new connection for node:1
+2026-10-08T16:25:20.006880Z	info	cache	returned workload certificate from cache	ttl=23h59m58.993121793s
+2026-10-08T16:25:20.009734Z	info	ads	ADS: new connection for node:2
+2026-10-08T16:25:20.009881Z	info	cache	returned workload trust anchor from cache	ttl=23h59m58.990121839s
+2026-10-08T16:25:20.166654Z	info	Readiness succeeded in 1.172662606s
+2026-10-08T16:25:20.167081Z	info	Envoy proxy is ready
+2026-10-08T16:55:30.818914Z	error	probes	Request to probe app failed: Get "http://10.244.1.28:8000/metrics": dial tcp 127.0.0.6:0->10.244.1.28:8000: connect: connection refused, original URL path = /app-health/app/readyz
+app URL path = /metrics
+2026-10-08T16:55:31.202426Z	error	probes	Request to probe app failed: Get "http://10.244.1.28:8000/metrics": dial tcp 127.0.0.6:0->10.244.1.28:8000: connect: connection refused, original URL path = /app-health/app/readyz
+app URL path = /metrics
+2026-10-08T17:01:38.970523Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=2
+[2026-10-08T17:01:54.580Z] "POST / HTTP/1.1" 200 - via_upstream - "-" 0 13 126 26 "10.244.2.0" "curl/8.13.0" "378dd678-3c25-497f-a73d-9c3fcc77df08" "app.lab" "10.244.1.28:8000" inbound|8000|| 127.0.0.6:50931 10.244.1.28:8000 10.244.2.0:0 - default
+[2026-10-08T17:02:02.610Z] "GET /docs HTTP/1.1" 403 - rbac_access_denied_matched_policy[none] - "-" 0 19 1 - "10.244.2.0" "curl/8.13.0" "2a786dd9-86fd-4f75-ad40-6014a2829c5c" "app.lab" "-" inbound|8000|| - 10.244.1.28:8000 10.244.2.0:0 - default
+[2026-10-08T17:09:23.906Z] "POST / HTTP/1.1" 403 - rbac_access_denied_matched_policy[none] - "-" 0 19 0 - "-" "Python-urllib/3.12" "dfca88c9-bc8c-4633-b40d-a67ba9a7fda1" "service-lab.service-lab.svc.cluster.local" "-" inbound|8000|| - 10.244.1.28:8000 10.244.2.33:43838 - default
+[2026-10-08T17:10:17.934Z] "POST / HTTP/1.1" 200 - via_upstream - "-" 0 13 1 1 "-" "Python-urllib/3.12" "4df8a3c6-3c51-483b-bfb0-3ca730a23399" "service-lab.service-lab.svc.cluster.local" "10.244.1.28:8000" inbound|8000|| 127.0.0.6:51797 10.244.1.28:8000 10.244.2.33:56416 - default
+[2026-10-08T17:10:17.953Z] "GET /docs HTTP/1.1" 403 - rbac_access_denied_matched_policy[none] - "-" 0 19 0 - "-" "Python-urllib/3.12" "a0a70995-480c-498d-9894-2d25323128ea" "service-lab.service-lab.svc.cluster.local" "-" inbound|8000|| - 10.244.1.28:8000 10.244.2.33:56444 - default

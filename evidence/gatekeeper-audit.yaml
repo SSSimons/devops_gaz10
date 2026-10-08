@@ -1,0 +1,187 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: ServiceLabSecurity
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"constraints.gatekeeper.sh/v1beta1","kind":"ServiceLabSecurity","metadata":{"annotations":{},"name":"service-lab-security"},"spec":{"enforcementAction":"deny","match":{"kinds":[{"apiGroups":[""],"kinds":["Pod"]}],"namespaces":["service-lab"]}}}
+  creationTimestamp: "2026-10-08T16:10:25Z"
+  generation: 1
+  name: service-lab-security
+  resourceVersion: "47767"
+  uid: 14cd9503-2c22-458d-b00d-46a0c0b8cada
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups:
+      - ""
+      kinds:
+      - Pod
+    namespaces:
+    - service-lab
+status:
+  auditTimestamp: "2026-10-08T17:13:04Z"
+  byPod:
+  - constraintUID: 14cd9503-2c22-458d-b00d-46a0c0b8cada
+    enforced: true
+    enforcementPointsStatus:
+    - enforcementPoint: vap.k8s.io
+      message: K8sNativeValidation engine is missing
+      observedGeneration: 1
+      state: error
+    id: gatekeeper-audit-5d468db496-hkzgt
+    observedGeneration: 1
+    operations:
+    - audit
+    - generate
+    - mutation-status
+    - status
+  - constraintUID: 14cd9503-2c22-458d-b00d-46a0c0b8cada
+    enforced: true
+    id: gatekeeper-controller-manager-85fcdcf84-t44vc
+    observedGeneration: 1
+    operations:
+    - mutation-webhook
+    - webhook
+  totalViolations: 111
+  violations:
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-689c9
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-689c9
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-5jnbg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-5jnbg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-5jnbg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-4hh8h
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-4hh8h
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-4hh8h
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-4bk76
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-4bk76
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-4bk76
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-2qf85
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-2qf85
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-2qf85
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-29nfg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-29nfg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-29nfg
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан requests.ephemeral-storage'
+    name: service-lab-59985cb46f-278r7
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: не задан limits.ephemeral-storage'
+    name: service-lab-59985cb46f-278r7
+    namespace: service-lab
+    version: v1
+  - enforcementAction: deny
+    group: ""
+    kind: Pod
+    message: 'Контейнер app: добавление capabilities запрещено'
+    name: service-lab-59985cb46f-278r7
+    namespace: service-lab
+    version: v1

@@ -1,0 +1,349 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: service-lab
+  namespace: service-lab
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-lab
+  namespace: service-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-lab
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        istio.io/rev: default
+        kubectl.kubernetes.io/default-container: app
+        kubectl.kubernetes.io/default-logs-container: app
+        prometheus.io/path: /stats/prometheus
+        prometheus.io/port: "15020"
+        prometheus.io/scrape: "true"
+        sidecar.istio.io/interceptionMode: REDIRECT
+        sidecar.istio.io/nativeSidecar: "false"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        sidecar.istio.io/status: '{"initContainers":["istio-validation"],"containers":["istio-proxy"],"volumes":["workload-socket","credential-socket","workload-certs","istio-envoy","istio-data","istio-podinfo","istio-token","istiod-ca-cert","istio-ca-crl"],"imagePullSecrets":null,"revision":"default"}'
+        traffic.sidecar.istio.io/excludeInboundPorts: "15020"
+        traffic.sidecar.istio.io/includeInboundPorts: '*'
+        traffic.sidecar.istio.io/includeOutboundIPRanges: '*'
+      labels:
+        app: service-lab
+        security.istio.io/tlsMode: istio
+        service.istio.io/canonical-name: service-lab
+        service.istio.io/canonical-revision: latest
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - proxy
+        - sidecar
+        - --domain
+        - $(POD_NAMESPACE).svc.cluster.local
+        - --proxyLogLevel=warning
+        - --proxyComponentLogLevel=misc:error
+        - --log_output_level=default:info
+        env:
+        - name: PILOT_CERT_PROVIDER
+          value: istiod
+        - name: CA_ADDR
+          value: istiod.istio-system.svc:15012
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: INSTANCE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: ISTIO_CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              divisor: "1"
+              resource: limits.cpu
+        - name: PROXY_CONFIG
+          value: |
+            {"holdApplicationUntilProxyStarts":true}
+        - name: ISTIO_META_POD_PORTS
+          value: |-
+            [
+                {"name":"http","containerPort":8000}
+            ]
+        - name: ISTIO_META_APP_CONTAINERS
+          value: app
+        - name: GOMEMLIMIT
+          valueFrom:
+            resourceFieldRef:
+              divisor: "1"
+              resource: limits.memory
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              divisor: "1"
+              resource: limits.cpu
+        - name: ISTIO_META_CLUSTER_ID
+          value: Kubernetes
+        - name: ISTIO_META_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: ISTIO_META_INTERCEPTION_MODE
+          value: REDIRECT
+        - name: ISTIO_META_WORKLOAD_NAME
+          value: service-lab
+        - name: ISTIO_META_OWNER
+          value: kubernetes://apis/apps/v1/namespaces/service-lab/deployments/service-lab
+        - name: ISTIO_META_MESH_ID
+          value: cluster.local
+        - name: TRUST_DOMAIN
+          value: cluster.local
+        - name: ISTIO_KUBE_APP_PROBERS
+          value: '{"/app-health/app/livez":{"tcpSocket":{"port":8000}},"/app-health/app/readyz":{"httpGet":{"path":"/metrics","port":8000}}}'
+        image: docker.io/istio/proxyv2:1.31.1
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - pilot-agent
+              - wait
+        name: istio-proxy
+        ports:
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            path: /healthz/ready
+            port: 15021
+          periodSeconds: 15
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 250m
+            ephemeral-storage: 128Mi
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            ephemeral-storage: 16Mi
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 1337
+          runAsNonRoot: true
+          runAsUser: 1337
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 600
+          httpGet:
+            path: /healthz/ready
+            port: 15021
+          periodSeconds: 1
+          timeoutSeconds: 3
+        volumeMounts:
+        - mountPath: /var/run/secrets/workload-spiffe-uds
+          name: workload-socket
+        - mountPath: /var/run/secrets/credential-uds
+          name: credential-socket
+        - mountPath: /var/run/secrets/workload-spiffe-credentials
+          name: workload-certs
+        - mountPath: /var/run/secrets/istio
+          name: istiod-ca-cert
+        - mountPath: /var/run/secrets/istio/crl
+          name: istio-ca-crl
+        - mountPath: /var/lib/istio/data
+          name: istio-data
+        - mountPath: /etc/istio/proxy
+          name: istio-envoy
+        - mountPath: /var/run/secrets/tokens
+          name: istio-token
+        - mountPath: /etc/istio/pod
+          name: istio-podinfo
+      - image: service-lab:security-1.0.0
+        imagePullPolicy: Never
+        livenessProbe:
+          httpGet:
+            path: /app-health/app/livez
+            port: 15020
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        name: app
+        ports:
+        - containerPort: 8000
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /app-health/app/readyz
+            port: 15020
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 128Mi
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 16Mi
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 10001
+          runAsNonRoot: true
+          runAsUser: 10001
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      initContainers:
+      - args:
+        - istio-iptables
+        - -p
+        - "15001"
+        - -z
+        - "15006"
+        - -u
+        - "1337"
+        - -m
+        - REDIRECT
+        - -i
+        - '*'
+        - -x
+        - ""
+        - -b
+        - '*'
+        - -d
+        - 15090,15021,15020
+        - --log_output_level=default:info
+        - --run-validation
+        - --skip-rule-apply
+        image: docker.io/istio/proxyv2:1.31.1
+        name: istio-validation
+        resources:
+          limits:
+            cpu: 250m
+            ephemeral-storage: 128Mi
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            ephemeral-storage: 16Mi
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 1337
+          runAsNonRoot: true
+          runAsUser: 1337
+          seccompProfile:
+            type: RuntimeDefault
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        sysctls:
+        - name: net.ipv4.ping_group_range
+          value: 10001 10001
+      serviceAccountName: service-lab
+      volumes:
+      - name: workload-socket
+      - name: credential-socket
+      - name: workload-certs
+      - emptyDir:
+          medium: Memory
+        name: istio-envoy
+      - emptyDir: {}
+        name: istio-data
+      - downwardAPI:
+          items:
+          - fieldRef:
+              fieldPath: metadata.labels
+            path: labels
+          - fieldRef:
+              fieldPath: metadata.annotations
+            path: annotations
+        name: istio-podinfo
+      - name: istio-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: istio-ca
+              expirationSeconds: 43200
+              path: istio-token
+      - configMap:
+          name: istio-ca-root-cert
+        name: istiod-ca-cert
+      - configMap:
+          name: istio-ca-crl
+          optional: true
+        name: istio-ca-crl
+      - emptyDir:
+          sizeLimit: 64Mi
+        name: tmp
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-lab
+  namespace: service-lab
+spec:
+  selector:
+    app: service-lab
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: service-lab
+  namespace: service-lab
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: app.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: service-lab
+            port:
+              number: 80
+---

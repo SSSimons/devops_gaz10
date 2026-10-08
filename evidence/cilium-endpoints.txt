@@ -1,0 +1,15 @@
+NAMESPACE           NAME                                            SECURITY IDENTITY   ENDPOINT STATE   IPV4          IPV6
+gatekeeper-system   gatekeeper-audit-5d468db496-hkzgt               27029               ready            10.244.1.26   fe80::2ccf:c1ff:fe47:234c
+gatekeeper-system   gatekeeper-controller-manager-85fcdcf84-t44vc   2565                ready            10.244.2.29   fe80::dcbd:47ff:fe0a:67e
+istio-system        istio-cni-node-7vzdh                            26582               ready            10.244.1.10   fe80::c89a:e3ff:fe8b:cc43
+istio-system        istio-cni-node-pnqlh                            13570               ready            10.244.2.12   fe80::548d:41ff:fe3d:17a8
+istio-system        istio-cni-node-x56kb                            26582               ready            10.244.0.13   fe80::645c:eff:fe4b:d4a8
+istio-system        istiod-599f966cc9-9nhxh                         13635               ready            10.244.1.11   fe80::d86f:e7ff:fe2e:f1bd
+kube-system         coredns-84dd68f8d9-lqpzg                        42542               ready            10.244.2.10   fe80::4482:a0ff:fe52:f4c4
+kube-system         coredns-84dd68f8d9-xq97f                        42542               ready            10.244.0.12   fe80::b466:dfff:fe78:6e87
+security-baseline   baseline-probe                                  3660                ready            10.244.2.34   fe80::471:1dff:feaa:4045
+security-outsider   outsider-probe                                  32976               ready            10.244.1.29   fe80::dc4b:32ff:fe5d:303c
+service-lab         security-probe                                  11110               ready            10.244.2.33   fe80::4fc:92ff:fe44:2d09
+service-lab         service-lab-5cb97b65df-p77ms                    16294               ready            10.244.2.32   fe80::a0fb:33ff:fed3:7b8c
+service-lab         service-lab-5cb97b65df-s5mdx                    16294               ready            10.244.1.28   fe80::e06b:e8ff:fe40:5ec4
+traefik             traefik-7b64f75895-9rkhd                        25832               ready            10.244.1.8    fe80::d051:2cff:feff:cb6b
