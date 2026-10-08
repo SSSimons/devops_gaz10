@@ -85,4 +85,4 @@ pytest -q
 # При установленном Helm: bash scripts/render-charts.sh
 ```
 
-GitHub Actions настроен на проверку Python, YAML, Bash, Rego, Docker-образа, рендера Helm и Pod после Istio injection. Результаты выполненных локальных проверок записаны в [VALIDATION.md](docs/VALIDATION.md). Запуск на твоём Kubernetes и реальные скриншоты выполняются отдельно.
+GitHub Actions настроен на проверку Python, YAML, Bash, Rego, Docker-образа, рендера Helm и Pod после Istio injection. Запуск на твоём Kubernetes и реальные скриншоты выполняются отдельно.
