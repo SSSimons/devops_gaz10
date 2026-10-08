@@ -30,5 +30,20 @@ assert cni["CNI_CONF_NAME"] == "05-cilium.conflist"
 webhook = find(objects("gatekeeper.yaml"), "ValidatingWebhookConfiguration", "gatekeeper-validating-webhook-configuration")
 validation = next(w for w in webhook["webhooks"] if w["name"] == "validation.gatekeeper.sh")
 assert validation["failurePolicy"] == "Fail"
-assert validation["matchConditions"][0]["expression"] == "request.namespace == 'service-lab'"
+conditions = {
+    item["name"]: item["expression"].strip()
+    for item in validation.get("matchConditions", [])
+}
+
+expected_conditions = {
+    "service-lab-only":
+        "has(request.namespace) && request.namespace == 'service-lab'",
+    "pods-only":
+        "request.resource.resource == 'pods' && "
+        "(!has(request.resource.group) || request.resource.group == '')",
+}
+
+assert conditions == expected_conditions, (
+    f"Неверные условия webhook Gatekeeper: {conditions}"
+)
 print("Helm: CNI chaining, Istio CNI, proxy limits и Gatekeeper fail-closed: OK")
