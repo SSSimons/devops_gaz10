@@ -2,7 +2,7 @@
 
 Продолжение `service-lab` в отдельном репозитории. Защищаем приложение на существующем Kubernetes: Istio + Cilium + OPA Gatekeeper.
 
-📖 [Установка по шагам](docs/SETUP.md) · 📸 [План скриншотов](docs/SCREENSHOTS.md) · ✅ [Проверки](docs/VALIDATION.md)
+📖 [Установка по шагам](docs/SETUP.md) 
 
 ## 🧩 Что сделано
 
