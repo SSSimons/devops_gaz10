@@ -1,0 +1,45 @@
+name: Проверка лаборатории
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python, YAML и Bash
+        run: |
+          pip install -r requirements-dev.txt -r requirements-check.txt
+          bash scripts/check-local.sh
+          pytest -q
+      - name: OPA / Rego
+        run: |
+          curl -fsSL --retry 2 https://github.com/open-policy-agent/opa/releases/download/v1.8.0/opa_linux_amd64_static -o /tmp/opa
+          chmod +x /tmp/opa
+          /tmp/opa test --v0-compatible policy/ -v
+      - name: Helm charts
+        run: |
+          bash scripts/render-charts.sh
+          python tools/check_rendered.py rendered
+          python tools/check_crds.py rendered
+          /tmp/opa eval --v0-compatible -d policy/security.rego \
+            -i rendered/injected-review.json --format=json \
+            'data.service_lab.security.violation' > rendered/injected-policy-result.json
+          python -c 'import json; r=json.load(open("rendered/injected-policy-result.json")); assert r["result"][0]["expressions"][0]["value"] == []'
+      - name: Docker и безопасный запуск
+        run: |
+          source versions.env
+          docker build -t "$APP_IMAGE" .
+          docker run --rm -i --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges \
+            --tmpfs /tmp:rw,size=64m \
+            --sysctl 'net.ipv4.ping_group_range=10001 10001' \
+            --entrypoint python "$APP_IMAGE" - < tools/check_container.py

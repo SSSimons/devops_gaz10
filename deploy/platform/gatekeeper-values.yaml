@@ -1,0 +1,16 @@
+replicas: 1
+validatingWebhookFailurePolicy: Fail
+auditInterval: 30
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+validatingWebhookMatchConditions:
+  - name: service-lab-only
+    expression: "has(request.namespace) && request.namespace == 'service-lab'"
+
+  - name: pods-only
+    expression: "request.resource.resource == 'pods' && (!has(request.resource.group) || request.resource.group == '')"

@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: ServiceLabSecurity
+metadata:
+  name: service-lab-security
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups:
+      - ''
+      kinds:
+      - Pod
+    namespaces:
+    - service-lab

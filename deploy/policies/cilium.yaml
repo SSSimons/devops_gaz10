@@ -1,0 +1,74 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: service-lab-access
+  namespace: service-lab
+spec:
+  endpointSelector: {}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: traefik
+        k8s:app.kubernetes.io/name: traefik
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: service-lab
+        k8s:app: security-probe
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: service-lab
+        k8s:app: service-lab
+    toPorts:
+    - ports:
+      - port: '8000'
+        protocol: TCP
+  - fromEntities:
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: '15020'
+        protocol: TCP
+      - port: '15021'
+        protocol: TCP
+  - fromCIDR:
+      - "10.244.0.1/32"
+      - "10.244.1.1/32"
+      - "10.244.2.1/32"
+    toPorts:
+      - ports:
+          - port: "15020"
+            protocol: TCP
+          - port: "15021"
+            protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s:k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: '53'
+        protocol: UDP
+      - port: '53'
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: istio-system
+        k8s:app: istiod
+    toPorts:
+    - ports:
+      - port: '15012'
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: service-lab
+        k8s:app: service-lab
+    toPorts:
+    - ports:
+      - port: '8000'
+        protocol: TCP
+  - toCIDR:
+    - 77.88.8.8/32
+    icmps:
+    - fields:
+      - family: IPv4
+        type: 8

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: service-lab-quota
+  namespace: service-lab
+spec:
+  hard:
+    requests.cpu: '2'
+    requests.memory: 2Gi
+    limits.cpu: '4'
+    limits.memory: 4Gi
+    requests.ephemeral-storage: 1Gi
+    limits.ephemeral-storage: 2Gi
+    pods: '10'
+    services: '3'
+    configmaps: '10'
+    secrets: '10'
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: service-lab-limits
+  namespace: service-lab
+spec:
+  limits:
+  - type: Container
+    min:
+      cpu: 10m
+      memory: 16Mi
+    max:
+      cpu: '1'
+      memory: 512Mi
+      ephemeral-storage: 512Mi
+    default:
+      cpu: 500m
+      memory: 256Mi
+      ephemeral-storage: 128Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 64Mi
+      ephemeral-storage: 16Mi

@@ -1,0 +1,8 @@
+chained: true
+cniBinDir: /opt/cni/bin
+cniConfDir: /etc/cni/net.d
+excludeNamespaces:
+- istio-system
+- kube-system
+- gatekeeper-system
+cniConfFileName: 05-cilium.conflist

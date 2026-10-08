@@ -1,0 +1,123 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: servicelabsecurity
+spec:
+  crd:
+    spec:
+      names:
+        kind: ServiceLabSecurity
+      validation:
+        openAPIV3Schema:
+          type: object
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package service_lab.security
+      
+      containers[c] {
+      	c := input.review.object.spec.containers[_]
+      }
+      
+      containers[c] {
+      	c := input.review.object.spec.initContainers[_]
+      }
+      
+      containers[c] {
+      	c := input.review.object.spec.ephemeralContainers[_]
+      }
+      
+      uid(c) = value {
+      	value := object.get(object.get(c, "securityContext", {}), "runAsUser", object.get(object.get(input.review.object.spec, "securityContext", {}), "runAsUser", 0))
+      }
+      
+      expected_uid(c) = 1337 {
+      	c.name == "istio-proxy"
+      }
+      
+      expected_uid(c) = 1337 {
+      	c.name == "istio-validation"
+      }
+      
+      expected_uid(c) = 10001 {
+      	c.name != "istio-proxy"
+      	c.name != "istio-validation"
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	uid(c) != expected_uid(c)
+      	msg := sprintf("Контейнер %s: неверный UID", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	sc := object.get(c, "securityContext", {})
+      	object.get(sc, "readOnlyRootFilesystem", false) != true
+      	msg := sprintf("Контейнер %s: корневая ФС должна быть read-only", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	sc := object.get(c, "securityContext", {})
+      	object.get(sc, "allowPrivilegeEscalation", true) != false
+      	msg := sprintf("Контейнер %s: запрещено повышение привилегий", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	object.get(object.get(c, "securityContext", {}), "privileged", false) == true
+      	msg := sprintf("Контейнер %s: privileged запрещён", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	caps := object.get(object.get(c, "securityContext", {}), "capabilities", {})
+      	not dropped_all(caps)
+      	msg := sprintf("Контейнер %s: нужен capabilities.drop ALL", [c.name])
+      }
+      
+      dropped_all(caps) {
+      	object.get(caps, "drop", [])[_] == "ALL"
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	caps := object.get(object.get(c, "securityContext", {}), "capabilities", {})
+      	count(object.get(caps, "add", [])) > 0
+      	msg := sprintf("Контейнер %s: добавление capabilities запрещено", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	scope := ["requests", "limits"][_]
+      	resource := ["cpu", "memory", "ephemeral-storage"][_]
+      	value := object.get(object.get(object.get(c, "resources", {}), scope, {}), resource, "")
+      	value == ""
+      	msg := sprintf("Контейнер %s: не задан %s.%s", [c.name, scope, resource])
+      }
+      
+      violation[{"msg": msg}] {
+      	field := ["hostNetwork", "hostPID", "hostIPC"][_]
+      	object.get(input.review.object.spec, field, false) == true
+      	msg := sprintf("%s запрещён", [field])
+      }
+      
+      violation[{"msg": "hostPath запрещён"}] {
+      	v := input.review.object.spec.volumes[_]
+      	object.get(v, "hostPath", null) != null
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	p := object.get(c, "ports", [])[_]
+      	object.get(p, "hostPort", 0) > 0
+      	msg := sprintf("Контейнер %s: hostPort запрещён", [c.name])
+      }
+      
+      violation[{"msg": msg}] {
+      	c := containers[_]
+      	profile := object.get(object.get(c, "securityContext", {}), "seccompProfile", object.get(object.get(input.review.object.spec, "securityContext", {}), "seccompProfile", {}))
+      	object.get(profile, "type", "") != "RuntimeDefault"
+      	msg := sprintf("Контейнер %s: нужен seccomp RuntimeDefault", [c.name])
+      }

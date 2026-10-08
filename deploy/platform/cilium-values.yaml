@@ -1,0 +1,22 @@
+cni:
+  chainingMode: generic-veth
+  customConf: true
+  configMap: service-lab-cni
+  exclusive: false
+routingMode: native
+enableIPv4Masquerade: false
+kubeProxyReplacement: false
+socketLB:
+  hostNamespaceOnly: true
+ipam:
+  mode: kubernetes
+operator:
+  replicas: 1
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 768Mi
+extraConfig:
+  local-router-ipv4: "169.254.32.16"
